@@ -1,0 +1,41 @@
+name: Test Build Configuration
+
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: Comma separated list of string targets to build
+        default: '"win-x64"'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        target: ${{ fromJson(format('[{0}]', inputs.targets || '"win-x64""')) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3
+        with:
+          dotnet-version: "8.0"
+
+      - name: Build
+        run: dotnet publish -p:Version=0.0.0-test -r ${{ matrix.target }} -o out/${{ matrix.target }} -- ./src/node-service/BitcoinNodeService.csproj
+
+      - name: Archive and Hash
+        run: |
+          New-Item -Name artifacts -ItemType Directory
+          Compress-Archive -Path ./out/${{ matrix.target }}/* -DestinationPath ./artifacts/${{ matrix.target }}.zip -CompressionLevel Optimal -Force
+          Get-FileHash -Path ./artifacts/${{ matrix.target }}.zip -Algorithm SHA256 | ForEach-Object { $_.Hash } | Out-File -FilePath ./artifacts/${{ matrix.target }}.zip.sha256
+        shell: pwsh
+
+      - name: Upload
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
+        with:
+          name: build-artifacts
+          path: ./artifacts/*
