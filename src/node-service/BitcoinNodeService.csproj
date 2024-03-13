@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <AssemblyTitle>Bitcoin Node Daemon Service</AssemblyTitle>
+        <Description>A Windows service wrapper for bitcoind. Enables automatic, unattended startup, and fast initial synchronization.</Description>
+        <Company>Bryan Gonzalez</Company>
+        <Copyright>© 2023 $(Company)</Copyright>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <PublishAot>true</PublishAot>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <NoWarn>$(NoWarn);IL2026;IL3050</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DebugType>none</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DebugType>none</DebugType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="microsoft.extensions.hosting" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Release'">
+        <Content Remove="appsettings.Development.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="../setup/install.ps1" CopyToOutputDirectory="PreserveNewest" Link="install.ps1" />
+        <Content Include="../setup/uninstall.ps1" CopyToOutputDirectory="PreserveNewest" Link="uninstall.ps1" />
+        <Content Include="../setup/install.bat" CopyToOutputDirectory="PreserveNewest" Link="install.bat" />
+        <Content Include="../setup/uninstall.bat" CopyToOutputDirectory="PreserveNewest" Link="uninstall.bat" />
+        <Content Include="../setup/NewRpcAuth.ps1" CopyToOutputDirectory="PreserveNewest" Link="NewRpcAuth.ps1" />
+        <Content Include="../../Readme.md" CopyToOutputDirectory="PreserveNewest" Link="Readme.md" />
+    </ItemGroup>
+
+</Project>
