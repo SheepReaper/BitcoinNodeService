@@ -29,6 +29,7 @@ jobs:
 
       - name: Archive and Hash
         run: |
+          New-Item -Name artifacts -ItemType Directory
           Compress-Archive -Path ./out/${{ matrix.target }}/* -DestinationPath ./artifacts/${{ matrix.target }}.zip -CompressionLevel Optimal -Force
           Get-FileHash -Path ./artifacts/${{ matrix.target }}.zip -Algorithm SHA256 | ForEach-Object { $_.Hash } | Out-File -FilePath ./artifacts/${{ matrix.target }}.zip.sha256
         shell: pwsh
