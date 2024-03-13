@@ -5,7 +5,7 @@ on:
     inputs:
       targets:
         description: Comma separated list of string targets to build
-        default: '"win-arm64","win-x64","win-x86"'
+        default: '"win-x64"'
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        target: ${{ fromJson(format('[{0}]', inputs.targets || '"win-arm64","win-x64","win-x86"')) }}
+        target: ${{ fromJson(format('[{0}]', inputs.targets || '"win-x64""')) }}
 
     steps:
       - name: Checkout code
