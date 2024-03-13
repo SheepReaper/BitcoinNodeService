@@ -29,12 +29,12 @@ jobs:
 
       - name: Archive and Hash
         run: |
-          Compress-Archive -Path ./out/${{ matrix.target }}/* -DestinationPath ./out/${{ matrix.target }}.zip -CompressionLevel Optimal -Force
-          Get-FileHash -Path ./out/${{ matrix.target }}.zip -Algorithm SHA256 | ForEach-Object { $_.Hash } | Out-File -FilePath ./out/${{ matrix.target }}.zip.sha256
+          Compress-Archive -Path ./out/${{ matrix.target }}/* -DestinationPath ./artifacts/${{ matrix.target }}.zip -CompressionLevel Optimal -Force
+          Get-FileHash -Path ./artifacts/${{ matrix.target }}.zip -Algorithm SHA256 | ForEach-Object { $_.Hash } | Out-File -FilePath ./artifacts/${{ matrix.target }}.zip.sha256
         shell: pwsh
 
       - name: Upload
         uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
         with:
           name: build-artifacts
-          path: ./out/*
+          path: ./artifacts/*
