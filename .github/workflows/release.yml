@@ -1,0 +1,44 @@
+name: Release Build
+
+on:
+  release:
+    types: [published, edited]
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        target:
+          - win-x64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3
+        with:
+          dotnet-version: "8.0"
+
+      - name: Build
+        run: |
+          $version = "${{ github.event.release.tag_name }}".Substring(1)
+          dotnet publish -p:Version=$version -r ${{ matrix.target }} -o out/${{ matrix.target }} -- ./src/node-service/BitcoinNodeService.csproj
+        shell: pwsh
+        
+
+      - name: Archive and Hash
+        run: |
+          Compress-Archive -Path ./out/${{ matrix.target }}/* -DestinationPath ./out/${{ matrix.target }}.zip -CompressionLevel Optimal -Force
+          Get-FileHash -Path ./out/${{ matrix.target }}.zip -Algorithm SHA256 | ForEach-Object { $_.Hash } | Out-File -FilePath ./out/${{ matrix.target }}.zip.sha256
+        shell: pwsh
+
+      - name: Upload
+        run: gh release upload ${{ github.event.release.tag_name }} ./out/${{ matrix.target }}.zip ./out/${{ matrix.target }}.zip.sha256 --clobber
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+        shell: pwsh
