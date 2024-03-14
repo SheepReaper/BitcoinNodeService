@@ -14,7 +14,8 @@ if (Get-Service -Name $serviceName -ErrorAction SilentlyContinue) {
     }
 
     # Remove the service
-    $service | Remove-Service
+    $deleteService = "sc.exe delete `"$serviceName`""
+    Invoke-Expression $deleteService
 
     Write-Host "Bitcoin Node Service has been uninstalled successfully."
 } else {

@@ -77,7 +77,9 @@ function New-Password {
     # Create a 32-byte Base64 encoded password
     $bytes = New-Object byte[] 24
 
-    [System.Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+    $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+    $rng.GetBytes($bytes)
+    $rng.Dispose()
 
     $base64String = [Convert]::ToBase64String($bytes)
 
@@ -113,7 +115,15 @@ function ConvertTo-HMAC {
     return [BitConverter]::ToString($hashBytes).Replace("-", "").ToLower()
 }
 
-$Password ??= $GeneratePassword ? (New-Password) : (Read-Host "Enter password" -AsSecureString)
+if (-not $Password) {
+    if ($GeneratePassword) {
+        $Password = New-Password
+    }
+    else {
+        $Password = Read-Host "Enter password" -AsSecureString
+    }
+}
+
 
 # Convert SecureString to plain text only when necessary
 if ($Password -is [System.Security.SecureString]) {

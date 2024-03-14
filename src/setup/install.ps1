@@ -1,28 +1,24 @@
 #Requires -RunAsAdministrator
 
-param(
-    [Parameter(Mandatory = $false)]
-    [string]$ServiceExecutablePath
-)
+# Get the directory of the current script
+$scriptDirectory = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 
 # Get the full path to the BitcoinNodeService.exe
-if (-not $ServiceExecutablePath) {
-    $ServiceExecutablePath = Resolve-Path ".\BitcoinNodeService.exe"
-}
+$ServiceExecutablePath = Join-Path -Path $scriptDirectory -ChildPath "BitcoinNodeService.exe"
 
 # Use NetworkService so it can run at boot without login
 $networkServiceAccount = "NT AUTHORITY\NetworkService"
-$networkServicePassword = ConvertTo-SecureString -String "doesn't matter" -AsPlainText -Force
-$networkServiceCredential = New-Object System.Management.Automation.PSCredential ($networkServiceAccount, $networkServicePassword)
 
 # Create the service to run automatically at boot under the Network Service account
-$service = New-Service -Name "Bitcoin Node Daemon" `
+$null = New-Service -Name "Bitcoin Node Daemon" `
     -BinaryPathName $ServiceExecutablePath `
     -DisplayName "Bitcoin Node Service" `
     -StartupType Automatic `
-    -Description "Service for monitoring and managing the Bitcoin node daemon." `
-    -Credential $networkServiceCredential
+    -Description "Service for monitoring and managing the Bitcoin node daemon."
     
+# Set the service to use the NetworkService account
+sc.exe config "Bitcoin Node Daemon" obj= $networkServiceAccount password= "doesn't matter"
+
 Write-Host "Bitcoin Node Service has been installed successfully and is set to start automatically."
     
 # Prompt for RPC credentials and update appsettings.json
@@ -30,11 +26,13 @@ $response = Read-Host "Would you like to generate RPC credentials and update app
 
 if ($response -match '^(y|yes)$') {
     $username = Read-Host "Enter the RPC username"
-    $rpcInfo = & ".\NewRpcAuth.ps1" -Username $username -GeneratePassword -Script
-    $appSettings = Get-Content "appsettings.json" | ConvertFrom-Json
+    $rpcScriptPath = Join-Path -Path $scriptDirectory -ChildPath "NewRpcAuth.ps1"
+    $rpcInfo = & $rpcScriptPath -Username $username -GeneratePassword -Script
+    $appSettingsPath = Join-Path -Path $scriptDirectory -ChildPath "appsettings.json"
+    $appSettings = Get-Content $appSettingsPath | ConvertFrom-Json
     $appSettings.BitcoinD.StartArgs += $rpcInfo.BitcoinDArgs
     $appSettings.BitcoinCli.StartArgs += $rpcInfo.BitcoinCliArgs
-    $appSettings | ConvertTo-Json | Set-Content "appsettings.json"
+    $appSettings | ConvertTo-Json -Depth 3 | Set-Content $appSettingsPath
 
     Write-Host "appsettings.json has been updated with the new RPC credentials."
 }
@@ -43,7 +41,7 @@ if ($response -match '^(y|yes)$') {
 $startResponse = Read-Host "Would you like to start the service now? (Y/N)"
 
 if ($startResponse -match '^(y|yes)$') {
-    $service.Start()
+    Start-Service -Name "Bitcoin Node Daemon"
     
     Write-Host "Bitcoin Node Service has been started."
 }
