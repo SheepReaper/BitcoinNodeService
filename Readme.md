@@ -1,3 +1,6 @@
+[![CodeQL](https://github.com/SheepReaper/BitcoinNodeService/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/SheepReaper/BitcoinNodeService/actions/workflows/github-code-scanning/codeql)
+[![Release Build](https://github.com/SheepReaper/BitcoinNodeService/actions/workflows/release.yml/badge.svg?event=release)](https://github.com/SheepReaper/BitcoinNodeService/actions/workflows/release.yml)
+
 # Bitcoin Node Daemon Service
 
 This service provides a convenient way to monitor and manage a Bitcoin node daemon on a Windows system. It ensures that the Bitcoin daemon (`bitcoind`) is running and provides RPC authentication credentials for secure communication.
@@ -10,7 +13,7 @@ This service provides a convenient way to monitor and manage a Bitcoin node daem
 
 ## Installation
 
-1. Download the latest release from the [Releases page](https://github.com/your-repo/your-project/releases).
+1. Download the latest release from the [Releases page](https://github.com/SheepReaper/BitcoinNodeService/releases).
 2. Extract the contents of the downloaded ZIP archive to a desired location. **(You may not change this location after the service is installed!)**
 4. Right-Click `install.bat` and select Run as Administrator to install the Bitcoin Node Daemon service. The install script is interactive and will prompt you to generate RPC credentials if desired. It will also offer to start the service for the first time.
 
@@ -44,8 +47,8 @@ uninstall.bat
 
 ## License
 
-[Your License Here]
+[MIT](https://github.com/SheepReaper/BitcoinNodeService?tab=MIT-1-ov-file)
 
 ## Contributing
 
-[Instructions for contributing to the project]
+[Contributing](https://github.com/SheepReaper/.github/blob/main/CONTRIBUTING.md)
