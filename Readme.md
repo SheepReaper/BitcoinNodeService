@@ -5,11 +5,25 @@
 
 This service provides a convenient way to monitor and manage a Bitcoin node daemon on a Windows system. It ensures that the Bitcoin daemon (`bitcoind`) is running and provides RPC authentication credentials for secure communication.
 
+# Why?
+
+Starting bitcoind for the first time takes ages to complete the initial block download. A little known bottleneck on windows is that writing to the Console is a blocking operation. The synchronization process is actually slowed down significntly by writing to it. Launching bitcoind manually, explicitly without a window speeds up the process significantly. From there, I had the itch to wrap it into a service that could start automatically, and even run unattended.
+
 ## Features
 
 - Automatic start of the Bitcoin node daemon (`bitcoind`) as a Windows service.
 - Generation of RPC authentication credentials for secure communication with the Bitcoin node.
 - Support for custom arguments passed to `bitcoind` and `bitcoin-cli`.
+
+## Requirements
+
+- bitcoind and bitcoin-cli. Both are provided by installing [bitcoin core](https://bitcoin.org/en/download)
+- If you plan on using the unattended startup, install bitcoin core and this application to a location that is not within a User directory, specifically, it needs to be accessible to NT AUTHORITY\NetworkService. This is an identity with minimal privilege, one step above Local Service, so that it can access the network.
+
+## Additional Steps
+
+- This documentation only covers the wrapper service. bitcoind requires additional configuration. Please reference [bitcoin.org](https://developer.bitcoin.org/) for complete documentation of bitcoind.
+- Any command line arguments you would need to pass to either bitcoind or bitcoin-cli can be instead placed in appsettings.json.
 
 ## Installation
 
