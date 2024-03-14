@@ -7,7 +7,7 @@ This service provides a convenient way to monitor and manage a Bitcoin node daem
 
 # Why?
 
-Starting bitcoind for the first time takes ages to complete the initial block download. A little known bottleneck on windows is that writing to the Console is a blocking operation. The synchronization process is actually slowed down significntly by writing to it. Launching bitcoind manually, explicitly without a window speeds up the process significantly. From there, I had the itch to wrap it into a service that could start automatically, and even run unattended.
+Starting bitcoind for the first time takes ages to complete the initial block download. A little-known bottleneck on Windows is that writing to the Console is a blocking operation. The synchronization process is slowed down significantly by writing to it. Launching bitcoind manually, explicitly without a window speeds up the process significantly. From there, I had the itch to wrap it into a service that could start automatically, and even run unattended.
 
 ## Features
 
