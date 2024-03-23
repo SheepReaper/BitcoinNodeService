@@ -13,9 +13,6 @@ internal sealed partial class DaemonMonitorService(
     ILogger<DaemonMonitorService> logger
 ) : BackgroundService
 {
-#pragma warning disable CA1823 // Avoid unused private fields
-    private readonly ILogger<DaemonMonitorService> _logger = logger;
-#pragma warning restore CA1823 // Avoid unused private fields
 
     private readonly IHostApplicationLifetime _lifeTime = lifeTime;
     private readonly BinOptions _dOptions = dOptions.Value;
@@ -32,18 +29,21 @@ internal sealed partial class DaemonMonitorService(
         },
     };
 
-    private enum StartResult
+    private sealed record StartResult(string Name)
     {
-        Success,
-        Reused,
-        Failed,
+        public static StartResult Success => new(nameof(Success));
+        public static StartResult Reused => new(nameof(Reused));
+        public static StartResult Failed => new(nameof(Failed));
+        public static StartResult FromProcessStart(bool result) => result ? Success : Reused;
+
+        public override string ToString() => Name;
     }
 
     private static StartResult TryStartProcess(Process process)
     {
         try
         {
-            return process.Start() ? StartResult.Success : StartResult.Reused;
+            return StartResult.FromProcessStart(process.Start());
         }
         catch (Exception e) when (
             e is InvalidOperationException ||
@@ -76,21 +76,20 @@ internal sealed partial class DaemonMonitorService(
 
         LogExec(daemonPath, daemonArgs);
 
-        switch (TryStartProcess(daemonProcess))
+        var dResult = TryStartProcess(daemonProcess);
+
+        if (dResult == StartResult.Failed)
         {
-            case StartResult.Reused:
-                LogUsedExistingProcess(daemonPath);
-                break;
+            LogResultBitcoinDStartFail();
 
-            case StartResult.Success:
-                break;
+            _lifeTime.StopApplication();
 
-            case StartResult.Failed:
-                LogResultBitcoinDStartFail();
+            return;
+        }
 
-                _lifeTime.StopApplication();
-
-                return;
+        if (dResult == StartResult.Reused)
+        {
+            LogUsedExistingProcess(daemonPath);
         }
 
         LogResultBitcoinDStartSuccess();
@@ -124,19 +123,15 @@ internal sealed partial class DaemonMonitorService(
 
         LogExec(cliPath, cliArgs);
 
-        switch(TryStartProcess(cliProcess)){
-            case StartResult.Success:
-            case StartResult.Reused:
-                LogStateStoppingBitcoinD();
+        if (TryStartProcess(cliProcess) == StartResult.Failed)
+        {
+            LogErrorCliExec();
+        }
+        else
+        {
+            LogStateStoppingBitcoinD();
 
-                await cliProcess.WaitForExitAsync(cts.Token);
-
-                break;
-
-            case StartResult.Failed:
-                LogErrorCliExec();
-
-                break;
+            await cliProcess.WaitForExitAsync(cts.Token);
         }
 
         LogStateWaitingDaemonStopped();

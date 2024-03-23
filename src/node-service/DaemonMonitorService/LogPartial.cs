@@ -2,6 +2,10 @@ namespace BitcoinNodeService;
 
 internal sealed partial class DaemonMonitorService
 {
+#pragma warning disable CA1823 // Avoid unused private fields
+    private readonly ILogger<DaemonMonitorService> _logger = logger;
+#pragma warning restore CA1823 // Avoid unused private fields
+
     [LoggerMessage(101, LogLevel.Critical, "Path supplied for {BinName} ({Path}) was not found.")]
     public partial void LogFileNotFound(string BinName, string Path);
 
@@ -13,7 +17,7 @@ internal sealed partial class DaemonMonitorService
 
     [LoggerMessage(201, LogLevel.Error, "Was unable to send the stop command.")]
     public partial void LogErrorCliExec();
-    
+
     [LoggerMessage(202, LogLevel.Error, "'{BinPath}' failed to start.")]
     public partial void LogExecFailError(string BinPath);
 
