@@ -26,8 +26,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="microsoft.extensions.hosting" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+        <PackageReference Include="microsoft.extensions.hosting" Version="8.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.1" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)' == 'Release'">
